@@ -8,5 +8,8 @@ instead of Libopencm3 etc.
 The project itself is blinking the user LED on the STM32G431KB Nucleo
 device.
 *** Tools
-This does assume you are using the arm-none-eabi-gcc toolchain as mentioned
-before. Also requires st-flash in order to interact with the STM32
+The following tools are needed to build this project
+- make
+- [[https://developer.arm.com/downloads/-/gnu-rm][arm-none-eabi-gcc]]
+- [[https://gcc.gnu.org/][gcc]] (for unit tests)
+- [[https://github.com/stlink-org/stlink][st-flash]] in order to interact with the STM32
