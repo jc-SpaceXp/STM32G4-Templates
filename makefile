@@ -17,7 +17,7 @@ LIBCM3INC := $(LIBCM3DIR)/include
 LIBCM3LIBDIR := $(LIBCM3DIR)/lib
 LIBCM3LIBFILE := $(LIBCM3LIBDIR)/libopencm3_stm32g4.a
 
-COMMON_CFLAGS = -Wall -std=c11 -g3 -Os
+COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
 LIBCM3_CPPFLAGS := -DSTM32G4 -DLITTLE_BIT=400000 -I $(LIBCM3INC)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
