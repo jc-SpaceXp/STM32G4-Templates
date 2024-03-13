@@ -21,6 +21,6 @@ Depends on which branch you are on but here is the full list
 
 Note: Libopencm3 is LGPLv3 licensed
 
-CMSIS also will produce linker warnings due to newlib
+CMSIS also will produce linker warnings due to newlib.
 Only a minimal set of files would be included for CMSIS due to the massive
 file size each project would be (~150Mb per project if all files are used)
