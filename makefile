@@ -24,7 +24,7 @@ CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 CPPFLAGS := -I $(INCDIR) $(LIBCM3_CPPFLAGS)
-CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -fno-common -ffunction-sections -fdata-sections
+CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
 LDSCRIPT := ld.stm32.basic
 LDFLAGS := --static -nostartfiles -L $(LIBCM3LIBDIR) -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
 LDLIBS := -lopencm3_stm32g4
