@@ -49,12 +49,12 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean libopencm3_git_update cm3clean srcdepdir flash-erase flash-write flash-backup
+.PHONY: all clean tests libopencm3_git_update cm3clean srcdepdir flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: all_tests.elf
 
 flash-backup:
-	$(FLASH) read BIN_BACKUP.bib 0x08000000 0x20000
+	$(FLASH) read BIN_BACKUP.bin 0x08000000 0x20000
 
 flash-write: $(TARGET).bin
 	$(FLASH) --flash=128k write $< 0x08000000
