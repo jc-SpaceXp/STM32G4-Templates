@@ -35,6 +35,7 @@ SRCOBJS := $(SRCS:%.c=$(OBJDIR)/%.o)
 SRCDEPS := $(SRCS:%.c=$(DEPDIR)/%.d)
 
 TARGET = stm32g4_main
+TESTTARGET = all_tests
 
 TESTCC := gcc
 TESTSIZE := size
@@ -51,7 +52,7 @@ TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 .PHONY: all clean tests libopencm3_git_update cm3clean srcdepdir flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
-tests: all_tests.elf
+tests: $(TESTTARGET).elf
 
 flash-backup:
 	$(FLASH) read BIN_BACKUP.bin 0x08000000 0x20000
@@ -107,7 +108,7 @@ $(TESTOBJDIR)/%.o: %.c
 
 clean:
 	@echo "Cleaning build"
-	-$(RM) $(TARGET).{elf,bin} all_tests.elf
+	-$(RM) $(TARGET).{elf,bin} $(TESTTARGET).elf
 	-$(RM) -rf $(OBJDIR) $(DEPDIR)
 
 cm3clean:
