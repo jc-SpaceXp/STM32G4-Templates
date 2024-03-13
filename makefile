@@ -67,7 +67,7 @@ libopencm3_git_update:
 	git submodule update --init --remote $(LIBDIR)/libopencm3
 
 $(LIBCM3LIBFILE): libopencm3_git_update
-	make TARGETS=stm32/g4 -C $(LIBCM3DIR)
+	make TARGETS=stm32/g4 FP_FLAGS="$(FPUFLAGS)" -C $(LIBCM3DIR)
 
 
 $(TARGET).bin: $(TARGET).elf
