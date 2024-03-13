@@ -3,7 +3,6 @@
 #include "stm32g4xx_hal.h"
 #include "stm32g4xx_nucleo.h"
 
-//static GPIO_InitTypeDef GPIO_InitStruct;
 
 void gpio_setup(void)
 {
