@@ -18,11 +18,12 @@ LIBCM3LIBDIR := $(LIBCM3DIR)/lib
 LIBCM3LIBFILE := $(LIBCM3LIBDIR)/libopencm3_stm32g4.a
 
 COMMON_CFLAGS = -Wall -std=c11 -g3 -Os
+LIBCM3_CPPFLAGS := -DSTM32G4 -DLITTLE_BIT=400000 -I $(LIBCM3INC)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
-CPPFLAGS := -DSTM32G4 -DLITTLE_BIT=400000 -I $(LIBCM3INC) -I $(INCDIR)
+CPPFLAGS := -I $(INCDIR) $(LIBCM3_CPPFLAGS)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -fno-common -ffunction-sections -fdata-sections
 LDSCRIPT := ld.stm32.basic
 LDFLAGS := --static -nostartfiles -L $(LIBCM3LIBDIR) -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
@@ -40,9 +41,9 @@ TESTSIZE := size
 
 TESTDIR = tests
 TESTLIBDIR = lib/greatest
-TESTOBJDIR = $(OBJDIR)/$(TESTDIR)
-TESTCPPFLAGS := -DSTM32G4 -DLITTLE_BIT=400000 -I $(LIBCM3INC) -I $(INCDIR) -I $(TESTLIBDIR) -I $(TESTDIR)
-TESTCFLAGS = $(COMMON_CFLAGS)
+TESTOBJDIR := $(OBJDIR)/$(TESTDIR)
+TESTCPPFLAGS := -I $(INCDIR) -I $(TESTLIBDIR) -I $(TESTDIR)
+TESTCFLAGS := $(COMMON_CFLAGS) $(LIBCM3_CPPFLAGS)
 
 TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
