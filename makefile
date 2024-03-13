@@ -42,6 +42,8 @@ STARTUPFILE := $(STMCMSISDIR)/Source/Templates/gcc/startup_stm32g431xx.s
 STARTUPOBJ := $(STARTUPFILE:%.s=$(OBJDIR)/%.o)
 SYSFILE := $(STMCMSISDIR)/Source/Templates/system_stm32g4xx.c
 SYSOBJ := $(SYSFILE:%.c=$(OBJDIR)/%.o)
+STMHALSRCS := $(STMHALDIR)/Src/stm32g4xx_hal.c $(STMHALDIR)/Src/stm32g4xx_hal_cortex.c $(STMHALDIR)/Src/stm32g4xx_hal_gpio.c
+STMHALOBJS := $(STMHALSRCS:%.c=$(OBJDIR)/%.o)
 
 TARGET = stm32g4_main
 TESTTARGET = all_tests
@@ -88,12 +90,17 @@ $(STARTUPOBJ): $(STARTUPFILE)
 $(STARTUPFILE):
 $(SYSFILE):
 
+$(OBJDIR)/$(STMHALDIR)/%.o: $(STMHALDIR)/%.c
+	@echo "Creating HAL objects"
+	@mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
 
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ)
+$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS)
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
