@@ -13,13 +13,14 @@ LIBDIR = lib
 OBJDIR = .obj
 DEPDIR = .deps
 
-STMHALDIR := $(LIBDIR)/stm32g4xx_hal_driver
+BASECMSISDIR := $(LIBDIR)/cmsis
+STMHALDIR := $(BASECMSISDIR)/stm32g4xx_hal_driver
 STMHALINC := $(STMHALDIR)/Inc
-STMCMSISDIR := $(LIBDIR)/cmsis_device_g4
+STMCMSISDIR := $(BASECMSISDIR)/cmsis_device_g4
 STMCMSISINC := $(STMCMSISDIR)/Include
-ARMCMSISDIR := $(LIBDIR)/CMSIS_V6
+ARMCMSISDIR := $(BASECMSISDIR)/CMSIS_6/CMSIS/Core
 ARMCMSISINC := $(ARMCMSISDIR)/Include
-BSPDIR := $(LIBDIR)/stm32g4xx-nucleo-bsp
+BSPDIR := $(BASECMSISDIR)/stm32g4xx-nucleo-bsp
 
 COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
 CMSIS_CPPFLAGS := -DUSE_HAL_DRIVER -DUSE_NUCLEO_32 -DSTM32G431xx -I $(STMHALINC) -I $(STMCMSISINC) -I $(ARMCMSISINC) -I $(BSPDIR)
@@ -62,7 +63,7 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean tests srcdepdir flash-erase flash-write flash-backup
+.PHONY: all clean tests srcdepdir cmsis_modules_git_update flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
@@ -95,12 +96,16 @@ $(OBJDIR)/$(STMHALDIR)/%.o: $(STMHALDIR)/%.c
 	@mkdir -p $(@D)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
 
+cmsis_modules_git_update:
+	@echo "Initializing/updating cmsis submodules"
+	git submodule update --init --remote $(STMHALDIR) $(STMCMSISDIR) $(BSPDIR) $(BASECMSISDIR)/CMSIS_6
+
 
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS)
+$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS) | cmsis_modules_git_update
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
