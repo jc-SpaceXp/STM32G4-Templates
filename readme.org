@@ -4,6 +4,9 @@ toolchain. Does include support for unit tests if you wish to use them.
 Otherwise remove the relevant dirs if you decide against testing. Look at
 other branches for different setups e.g. FreeRTOS support, CMSIS support
 instead of Libopencm3 etc.
+
+The project itself is blinking the user LED on the STM32G431KB Nucleo
+device.
 *** Tools
 This does assume you are using the arm-none-eabi-gcc toolchain as mentioned
 before. Also requires st-flash in order to interact with the STM32
