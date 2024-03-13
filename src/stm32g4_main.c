@@ -7,7 +7,8 @@
 int main (void)
 {
 	HAL_Init();
-	LED2_GPIO_CLK_ENABLE();
+
+	gpio_setup();
 
 	for (;;) {
 		HAL_GPIO_TogglePin(LED2_GPIO_PORT, LED2_PIN);
