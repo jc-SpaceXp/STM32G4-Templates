@@ -1,5 +1,6 @@
 TOOLSET = arm-none-eabi
 CC := $(TOOLSET)-gcc
+AS := $(TOOLSET)-as
 GDB := $(TOOLSET)-gdb
 SIZE := $(TOOLSET)-size
 OBJCOPY := $(TOOLSET)-objcopy
@@ -26,6 +27,7 @@ CMSIS_CPPFLAGS := -DUSE_HAL_DRIVER -DUSE_NUCLEO_32 -DSTM32G431xx -I $(STMHALINC)
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
+AFLAGS := -D --warn $(CPUFLAGS) -g
 CPPFLAGS := -I $(INCDIR) $(CMSIS_CPPFLAGS)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
 LDSCRIPT := STM32G431KBTX_FLASH.ld
@@ -36,6 +38,10 @@ DEPFLAGS = -MT $@ -MMD -MP -MF $(@:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
 SRCS := $(wildcard $(SRCDIR)/*.c)
 SRCOBJS := $(SRCS:%.c=$(OBJDIR)/%.o)
 SRCDEPS := $(SRCS:%.c=$(DEPDIR)/%.d)
+STARTUPFILE := $(STMCMSISDIR)/Source/Templates/gcc/startup_stm32g431xx.s
+STARTUPOBJ := $(STARTUPFILE:%.s=$(OBJDIR)/%.o)
+SYSFILE := $(STMCMSISDIR)/Source/Templates/system_stm32g4xx.c
+SYSOBJ := $(SYSFILE:%.c=$(OBJDIR)/%.o)
 
 TARGET = stm32g4_main
 TESTTARGET = all_tests
@@ -68,11 +74,26 @@ flash-erase:
 	$(FLASH) erase
 
 
+$(SYSOBJ): $(SYSFILE)
+	@echo "Creating system object"
+	@mkdir -p $(@D)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(STARTUPOBJ): $(STARTUPFILE)
+	@echo "Creating startup object"
+	@mkdir -p $(@D)
+	$(AS) $(AFLAGS) $< -o $@
+
+# Satisfy make, no rule needed for target, is only a prerequisite
+$(STARTUPFILE):
+$(SYSFILE):
+
+
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS)
+$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ)
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
