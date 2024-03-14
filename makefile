@@ -21,6 +21,7 @@ STMCMSISINC := $(STMCMSISDIR)/Include
 ARMCMSISDIR := $(BASECMSISDIR)/CMSIS_6/CMSIS/Core
 ARMCMSISINC := $(ARMCMSISDIR)/Include
 BSPDIR := $(BASECMSISDIR)/stm32g4xx-nucleo-bsp
+CMSISMODULES := $(STMHALDIR) $(STMCMSISDIR) $(BSPDIR) $(BASECMSISDIR)/CMSIS_6
 
 RTOSDIR := $(LIBDIR)/FreeRTOS-Kernel
 RTOSINCDIR := $(RTOSDIR)/include
@@ -34,7 +35,8 @@ RTOSSRCS += $(RTOSDIR)/portable/MemMang/heap_$(RTOSHEAPCONFIG).c
 RTOSOBJS := $(RTOSSRCS:%.c=$(OBJDIR)/%.o)
 
 COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
-CMSIS_CPPFLAGS := -DUSE_HAL_DRIVER -DUSE_NUCLEO_32 -DSTM32G431xx -I $(STMHALINC) -I $(STMCMSISINC) -I $(ARMCMSISINC) -I $(BSPDIR)
+CMSIS_CPPFLAGS := -DUSE_HAL_DRIVER -DUSE_NUCLEO_32 -DSTM32G431xx
+CMSIS_CPPFLAGS += -I $(STMHALINC) -I $(STMCMSISINC) -I $(ARMCMSISINC) -I $(BSPDIR)
 RTOSCPPFLAGS := -I $(RTOSINCDIR) -I $(RTOSINCDIR)/portable -I $(INCDIR) -I $(RTOSDEVDIR)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
@@ -44,7 +46,8 @@ AFLAGS := -D --warn $(CPUFLAGS) -g
 CPPFLAGS := -I $(INCDIR) $(CMSIS_CPPFLAGS) -I $(RTOSINCDIR) -I $(RTOSDEVDIR)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
 LDSCRIPT := STM32G431KBTX_FLASH.ld
-LDFLAGS := -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
+LDFLAGS := -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
+LDFLAGS += -Wl,-Map=main.map,--cref
 LDLIBS :=
 DEPFLAGS = -MT $@ -MMD -MP -MF $(@:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
 
@@ -55,7 +58,9 @@ STARTUPFILE := $(STMCMSISDIR)/Source/Templates/gcc/startup_stm32g431xx.s
 STARTUPOBJ := $(STARTUPFILE:%.s=$(OBJDIR)/%.o)
 SYSFILE := $(STMCMSISDIR)/Source/Templates/system_stm32g4xx.c
 SYSOBJ := $(SYSFILE:%.c=$(OBJDIR)/%.o)
-STMHALSRCS := $(STMHALDIR)/Src/stm32g4xx_hal.c $(STMHALDIR)/Src/stm32g4xx_hal_cortex.c $(STMHALDIR)/Src/stm32g4xx_hal_gpio.c
+STMHALSRCS := $(STMHALDIR)/Src/stm32g4xx_hal.c
+STMHALSRCS += $(STMHALDIR)/Src/stm32g4xx_hal_cortex.c 
+STMHALSRCS += $(STMHALDIR)/Src/stm32g4xx_hal_gpio.c
 STMHALOBJS := $(STMHALSRCS:%.c=$(OBJDIR)/%.o)
 
 TARGET = stm32g4_main
@@ -75,7 +80,8 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean tests srcdepdir cmsis_modules_git_update freertos_git_update flash-erase flash-write flash-backup
+.PHONY: all clean tests srcdepdir cmsis_modules_git_update freertos_git_update \
+flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
@@ -120,14 +126,15 @@ $(OBJDIR)/$(STMHALDIR)/%.o: $(STMHALDIR)/%.c
 
 cmsis_modules_git_update:
 	@echo "Initializing/updating cmsis submodules"
-	git submodule update --init --remote $(STMHALDIR) $(STMCMSISDIR) $(BSPDIR) $(BASECMSISDIR)/CMSIS_6
+	git submodule update --init --remote $(CMSISMODULES)
 
 
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS) $(RTOSOBJS) | cmsis_modules_git_update
+$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS) $(RTOSOBJS) \
+| cmsis_modules_git_update
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
