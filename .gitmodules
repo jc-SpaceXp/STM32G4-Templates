@@ -13,3 +13,6 @@
 [submodule "lib/cmsis/CMSIS_6"]
 	path = lib/cmsis/CMSIS_6
 	url = https://github.com/ARM-software/CMSIS_6
+[submodule "lib/FreeRTOS-Kernel"]
+	path = lib/FreeRTOS-Kernel
+	url = https://github.com/FreeRTOS/FreeRTOS-Kernel/

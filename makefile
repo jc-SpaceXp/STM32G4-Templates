@@ -22,14 +22,26 @@ ARMCMSISDIR := $(BASECMSISDIR)/CMSIS_6/CMSIS/Core
 ARMCMSISINC := $(ARMCMSISDIR)/Include
 BSPDIR := $(BASECMSISDIR)/stm32g4xx-nucleo-bsp
 
+RTOSDIR := $(LIBDIR)/FreeRTOS-Kernel
+RTOSINCDIR := $(RTOSDIR)/include
+RTOSDEVDIR := $(RTOSDIR)/portable/GCC/ARM_CM4F
+RTOSCONFIGDIR := $(INCDIR)
+RTOSHEAPCONFIG ?= 4
+# Add additional files if necessary
+RTOSSRCS := $(RTOSDIR)/tasks.c $(RTOSDIR)/list.c $(RTOSDIR)/queue.c
+RTOSSRCS += $(RTOSDEVDIR)/port.c
+RTOSSRCS += $(RTOSDIR)/portable/MemMang/heap_$(RTOSHEAPCONFIG).c
+RTOSOBJS := $(RTOSSRCS:%.c=$(OBJDIR)/%.o)
+
 COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
 CMSIS_CPPFLAGS := -DUSE_HAL_DRIVER -DUSE_NUCLEO_32 -DSTM32G431xx -I $(STMHALINC) -I $(STMCMSISINC) -I $(ARMCMSISINC) -I $(BSPDIR)
+RTOSCPPFLAGS := -I $(RTOSINCDIR) -I $(RTOSINCDIR)/portable -I $(INCDIR) -I $(RTOSDEVDIR)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 AFLAGS := -D --warn $(CPUFLAGS) -g
-CPPFLAGS := -I $(INCDIR) $(CMSIS_CPPFLAGS)
+CPPFLAGS := -I $(INCDIR) $(CMSIS_CPPFLAGS) -I $(RTOSINCDIR) -I $(RTOSDEVDIR)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
 LDSCRIPT := STM32G431KBTX_FLASH.ld
 LDFLAGS := -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
@@ -63,7 +75,7 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean tests srcdepdir cmsis_modules_git_update flash-erase flash-write flash-backup
+.PHONY: all clean tests srcdepdir cmsis_modules_git_update freertos_git_update flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
@@ -75,6 +87,16 @@ flash-write: $(TARGET).bin
 
 flash-erase:
 	$(FLASH) erase
+
+
+freertos_git_update:
+	@echo "Initializing/updating FreeRTOS submodule"
+	git submodule update --init --remote $(LIBDIR)/FreeRTOS-Kernel
+
+$(OBJDIR)/$(RTOSDIR)/%.o: $(RTOSDIR)/%.c | freertos_git_update
+	@echo "Creating RTOS objects"
+	@mkdir -p $(@D)
+	$(CC) $(RTOSCPPFLAGS) $(CFLAGS) -c $< -o $@
 
 
 $(SYSOBJ): $(SYSFILE)
@@ -105,7 +127,7 @@ $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS) | cmsis_modules_git_update
+$(TARGET).elf: $(SRCOBJS) $(STARTUPOBJ) $(SYSOBJ) $(STMHALOBJS) $(RTOSOBJS) | cmsis_modules_git_update
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
