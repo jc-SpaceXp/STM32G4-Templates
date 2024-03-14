@@ -3,5 +3,5 @@
 *.map
 .deps/
 .obj/
-*.org~
+*.*~
 *.org.*
