@@ -21,6 +21,7 @@ Depends on which branch you are on but here is the full list
 
 Note: Libopencm3 is LGPLv3 licensed
 
-CMSIS also will produce linker warnings due to newlib.
-Only a minimal set of files would be included for CMSIS due to the massive
-file size each project would be (~150Mb per project if all files are used)
+CMSIS will also produce linker warnings due to newlib e.g. "_write is not implemented and will
+always fail". Another linker warning will appear too: elf has a LOAD segment with RWX permissions.
+There is quite a bit of a size overhead when pulling in all the CMSIS modules. An average project
+would be around ~100Mb.
