@@ -81,7 +81,7 @@ TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
 .PHONY: all clean tests srcdepdir cmsis_modules_git_update freertos_git_update \
-flash-erase flash-write flash-backup
+test_modules_git_update flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
