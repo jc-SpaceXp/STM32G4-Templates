@@ -17,13 +17,25 @@ LIBCM3INC := $(LIBCM3DIR)/include
 LIBCM3LIBDIR := $(LIBCM3DIR)/lib
 LIBCM3LIBFILE := $(LIBCM3LIBDIR)/libopencm3_stm32g4.a
 
+RTOSDIR := $(LIBDIR)/FreeRTOS-Kernel
+RTOSINCDIR := $(RTOSDIR)/include
+RTOSDEVDIR := $(RTOSDIR)/portable/GCC/ARM_CM4F
+RTOSCONFIGDIR := $(INCDIR)
+RTOSHEAPCONFIG ?= 4
+# Add additional files if necessary
+RTOSSRCS := $(RTOSDIR)/tasks.c $(RTOSDIR)/list.c $(RTOSDIR)/queue.c
+RTOSSRCS += $(RTOSDEVDIR)/port.c
+RTOSSRCS += $(RTOSDIR)/portable/MemMang/heap_$(RTOSHEAPCONFIG).c
+RTOSOBJS := $(RTOSSRCS:%.c=$(OBJDIR)/%.o)
+
 COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
 LIBCM3_CPPFLAGS := -DSTM32G4 -I $(LIBCM3INC)
+RTOSCPPFLAGS := -I $(RTOSINCDIR) -I $(RTOSINCDIR)/portable -I $(INCDIR) -I $(RTOSDEVDIR)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
-CPPFLAGS := -I $(INCDIR) $(LIBCM3_CPPFLAGS)
+CPPFLAGS := -I $(INCDIR) $(LIBCM3_CPPFLAGS) -I $(RTOSINCDIR) -I $(RTOSDEVDIR)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
 LDSCRIPT := ld.stm32.basic
 LDFLAGS := --static -nostartfiles -L $(LIBCM3LIBDIR) -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
@@ -51,7 +63,7 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean tests libopencm3_git_update cm3clean srcdepdir flash-erase flash-write flash-backup
+.PHONY: all clean tests libopencm3_git_update cm3clean freertos_git_update srcdepdir flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
@@ -71,12 +83,21 @@ libopencm3_git_update:
 $(LIBCM3LIBFILE): libopencm3_git_update
 	make TARGETS=stm32/g4 FP_FLAGS="$(FPUFLAGS)" -C $(LIBCM3DIR)
 
+freertos_git_update:
+	@echo "Initializing/updating FreeRTOS submodule"
+	git submodule update --init --remote $(LIBDIR)/FreeRTOS-Kernel
+
+$(OBJDIR)/$(RTOSDIR)/%.o: $(RTOSDIR)/%.c | freertos_git_update
+	@echo "Creating RTOS objects"
+	@mkdir -p $(@D)
+	$(CC) $(RTOSCPPFLAGS) $(CFLAGS) -c $< -o $@
+
 
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(LIBCM3LIBFILE)
+$(TARGET).elf: $(SRCOBJS) $(LIBCM3LIBFILE) $(RTOSOBJS)
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
