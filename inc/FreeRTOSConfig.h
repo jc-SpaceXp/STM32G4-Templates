@@ -72,7 +72,7 @@ to exclude the API function. */
 // Cortex M specific defintions
 #ifdef __NVIC_PRIO_BITS // CMSIS defines this
 	#define configPRIO_BITS                __NVIC_PRIO_BITS
-#else 
+#else
 	#define configPRIO_BITS                4
 #endif /* __NVIC_PRIO_BITS */
 
