@@ -64,8 +64,8 @@ TESTSRCS := $(wildcard $(TESTDIR)/*.c)
 TESTOBJS := $(TESTSRCS:%.c=$(TESTOBJDIR)/%.o)
 
 
-.PHONY: all clean tests libopencm3_git_update cm3clean freertos_git_update srcdepdir \
-flash-erase flash-write flash-backup
+.PHONY: all clean tests srcdepdir libopencm3_git_update cm3clean freertos_git_update \
+test_modules_git_update flash-erase flash-write flash-backup
 all: $(TARGET).elf $(TARGET).bin
 tests: $(TESTTARGET).elf
 
