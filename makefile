@@ -16,16 +16,20 @@ LIBCM3DIR := $(LIBDIR)/libopencm3
 LIBCM3INC := $(LIBCM3DIR)/include
 LIBCM3LIBDIR := $(LIBCM3DIR)/lib
 LIBCM3LIBFILE := $(LIBCM3LIBDIR)/libopencm3_stm32g4.a
+LIBCM3SCRIPTGEN := $(LIBCM3DIR)/scripts/genlink.py
+LIBCM3LDDEVDATA := $(LIBCM3DIR)/ld/devices.data
+LDSCRIPTGEN := $(LIBCM3DIR)/ld/linker.ld.S
+LDSCRIPT := generated.stm32g431kb.ld
 
 COMMON_CFLAGS = -Wall -Wextra -std=c11 -g3 -Os
-LIBCM3_CPPFLAGS := -DSTM32G4 -I $(LIBCM3INC)
+LIBCM3_CPPFLAGS := -I $(LIBCM3INC)
+LIBCM3_CPPFLAGS += $(shell python3 $(LIBCM3SCRIPTGEN) $(LIBCM3LDDEVDATA) stm32g431kb DEFS)
 
 CPUFLAGS = -mcpu=cortex-m4 -mthumb
 FPUFLAGS = -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 CPPFLAGS := -I $(INCDIR) $(LIBCM3_CPPFLAGS)
 CFLAGS := $(CPUFLAGS) $(FPUFLAGS) $(COMMON_CFLAGS) -ffunction-sections -fdata-sections
-LDSCRIPT := ld.stm32.basic
 LDFLAGS := --static -nostartfiles -L $(LIBCM3LIBDIR) -T $(LDSCRIPT) -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group -Wl,-Map=main.map,--cref
 LDLIBS := -lopencm3_stm32g4
 DEPFLAGS = -MT $@ -MMD -MP -MF $(@:$(OBJDIR)/%.o=$(DEPDIR)/%.d)
@@ -71,12 +75,17 @@ libopencm3_git_update:
 $(LIBCM3LIBFILE): libopencm3_git_update
 	make TARGETS=stm32/g4 FP_FLAGS="$(FPUFLAGS)" -C $(LIBCM3DIR)
 
+$(LDSCRIPT): $(LDSCRIPTGEN)
+	@echo "Generating a linker script"
+	$(CC) $(LIBCM3_CPPFLAGS) $(CPUFLAGS) $(FPUFLAGS) -P -E -C -traditional $< -o $@
+
+$(LDSCRIPTGEN):
 
 $(TARGET).bin: $(TARGET).elf
 	@echo "Creating binary image"
 	$(OBJCOPY) -O binary $^ $@
 
-$(TARGET).elf: $(SRCOBJS) $(LIBCM3LIBFILE)
+$(TARGET).elf: $(SRCOBJS) $(LIBCM3LIBFILE) | $(LDSCRIPT)
 	@echo "Linking objects"
 	$(CC) $(LDFLAGS) $(LDLIBS) $(CPUFLAGS) $(FPUFLAGS) $^ -o $@
 	$(SIZE) $@
