@@ -14,7 +14,10 @@ The following tools are needed to build this project
 - [[https://gcc.gnu.org/][gcc]] (for unit tests)
 - [[https://github.com/stlink-org/stlink][st-flash]] in order to interact with the STM32
 *** Submodules
-- [[https://www.arm.com/technologies/cmsis][CMSIS]]
+- [[https://www.arm.com/technologies/cmsis][ARM CMSIS V6]]
+- [[https://github.com/STMicroelectronics/stm32g4xx-nucleo-bsp][STM32G4xx Nucleo BSP]]
+- [[https://github.com/STMicroelectronics/stm32g4xx_hal_driver][STM32G4 HAL]]
+- [[https://github.com/STMicroelectronics/cmsis_device_g4][CMSIS G4]] CMSIS device library
 - [[https://github.com/silentbicycle/greatest][Greatest]] C test framework
 
 CMSIS will also produce linker warnings due to newlib e.g. "_write is not
