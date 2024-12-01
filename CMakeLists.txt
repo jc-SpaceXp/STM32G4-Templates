@@ -160,6 +160,23 @@ if (${CMAKE_CROSSCOMPILING})
 		COMMAND ${CMAKE_OBJCOPY} -O binary "$<TARGET_FILE_NAME:${SRCTARGET}>" "${SRCTARGET}.bin"
 		COMMENT "Binary generation (for flashing) --> $<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin"
 	)
+
+	# St-util flashing commands
+	add_custom_target(flash-write
+		COMMAND ${FLASHUTIL} --flash=128k write "$<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin" 0x08000000
+		DEPENDS "$<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin"
+		COMMENT "Flashing $<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin to STM32 device"
+	)
+
+	add_custom_target(flash-erase
+		COMMAND ${FLASHUTIL} erase
+		COMMENT "Erasing flash on STM32 device"
+	)
+
+	add_custom_target(flash-backup
+		COMMAND ${FLASHUTIL} read BIN_BACKUP.bin 0x08000000 0x20000
+		COMMENT "Backing up flash from STM32 device"
+	)
 else ()
 	# Unit test section
 	enable_testing()
@@ -179,23 +196,6 @@ else ()
 		${INCDIR}
 	)
 endif()
-
-# St-util flashing commands
-add_custom_target(flash-write
-	COMMAND ${FLASHUTIL} --flash=128k write "$<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin" 0x08000000
-	DEPENDS "$<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin"
-	COMMENT "Flashing $<TARGET_FILE_BASE_NAME:${SRCTARGET}>.bin to STM32 device"
-)
-
-add_custom_target(flash-erase
-	COMMAND ${FLASHUTIL} erase
-	COMMENT "Erasing flash on STM32 device"
-)
-
-add_custom_target(flash-backup
-	COMMAND ${FLASHUTIL} read BIN_BACKUP.bin 0x08000000 0x20000
-	COMMENT "Backing up flash from STM32 device"
-)
 
 unset(CMAKE_TOOLCHAIN_FILE)
 unset(DEBUG_CMAKE CACHE)
