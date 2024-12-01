@@ -9,10 +9,50 @@ The project itself is blinking the user LED on the STM32G431KB Nucleo
 device.
 *** Tools
 The following tools are needed to build this project
-- make
+- make or cmake
 - [[https://developer.arm.com/downloads/-/gnu-rm][arm-none-eabi-gcc]]
 - [[https://gcc.gnu.org/][gcc]] (for unit tests)
 - [[https://github.com/stlink-org/stlink][st-flash]] in order to interact with the STM32
+*** CMake
+**** CLI (No Presets)
+#+BEGIN_EXAMPLE bash
+# Generation stage (unit tests and stm32 most be in different directories)
+cmake . -B build -DCMAKE_TOOLCHAIN_FILE=arm-none-eabi.cmake
+cmake . -B testbuild
+
+# Generation stage w/ my cmake debugging prints
+cmake . -B testbuild -DDEBUG_CMAKE=True
+
+# Build stage
+cmake --build build
+cmake --build testbuild
+
+# Flash to stm32 via st-flash (via generated makefile)
+make -C build flash-write/fast
+# Build and then flash erase stm32
+cmake --build build --target all flash-erase
+
+# Running tests via ctest
+ctest --test-dir testbuild
+#+END_EXAMPLE
+**** Presets
+#+BEGIN_EXAMPLE bash
+# Generation stage
+$ cmake --preset stm32
+$ cmake --preset host-tests
+
+# Build stage
+$ cmake --build --preset stm32
+$ cmake --build --preset host-tests
+
+# Flash to stm32 via st-flash
+$ cmake --build --preset stm32 --target=flash-write
+# Build and then flash erase stm32
+$ cmake --build --preset stm32 --target all flash-erase
+
+# Running tests via ctest
+$ ctest --preset host-tests
+#+END_EXAMPLE
 *** Submodules
 - [[https://www.arm.com/technologies/cmsis][ARM CMSIS V6]]
 - [[https://github.com/STMicroelectronics/stm32g4xx-nucleo-bsp][STM32G4xx Nucleo BSP]]
