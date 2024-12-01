@@ -1,0 +1,35 @@
+{
+	"version": 3,
+	"cmakeMinimumRequired": {
+		"major": 3,
+		"minor": 21,
+		"patch": 0
+	},
+	"configurePresets": [
+		{
+			"name": "stm32",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+			"toolchainFile": "arm-none-eabi-gcc-toolchain.cmake"
+		},
+		{
+			"name": "host-tests",
+			"binaryDir": "${sourceDir}/build/${presetName}"
+		}
+	],
+	"buildPresets": [
+		{
+			"name": "stm32",
+			"configurePreset": "stm32"
+		},
+		{
+			"name": "host-tests",
+			"configurePreset": "host-tests"
+		}
+	],
+	"testPresets": [
+		{
+			"name": "host-tests",
+			"configurePreset": "host-tests"
+		}
+	]
+}
