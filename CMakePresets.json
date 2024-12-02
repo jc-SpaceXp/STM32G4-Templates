@@ -13,12 +13,10 @@
 		},
 		{
 			"name": "host-tests",
-			"hidden": true,
 			"binaryDir": "${sourceDir}/build/${presetName}"
 		},
 		{
 			"name": "asan-host-tests",
-			"hidden": true,
 			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": { "ASAN": "ON" }
 		},
@@ -49,12 +47,20 @@
 			"configurePreset": "stm32"
 		},
 		{
+			"name": "host-tests",
+			"configurePreset": "host-tests"
+		},
+		{
 			"name": "host-tests-clang",
 			"configurePreset": "host-tests-clang"
 		},
 		{
 			"name": "host-tests-gcc",
 			"configurePreset": "host-tests-gcc"
+		},
+		{
+			"name": "asan-host-tests",
+			"configurePreset": "asan-host-tests"
 		},
 		{
 			"name": "asan-host-tests-clang",
@@ -67,12 +73,20 @@
 	],
 	"testPresets": [
 		{
+			"name": "host-tests",
+			"configurePreset": "host-tests"
+		},
+		{
 			"name": "host-tests-clang",
 			"configurePreset": "host-tests-clang"
 		},
 		{
 			"name": "host-tests-gcc",
 			"configurePreset": "host-tests-gcc"
+		},
+		{
+			"name": "asan-host-tests",
+			"configurePreset": "asan-host-tests"
 		},
 		{
 			"name": "asan-host-tests-clang",
