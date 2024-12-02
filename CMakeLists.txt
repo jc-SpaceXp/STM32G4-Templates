@@ -61,6 +61,10 @@ set(TSTDIR ${CMAKE_SOURCE_DIR}/tests)
 set(MOCKLIBDIR "${LIBDIR}/FFF")
 set(TESTLIBDIR "${LIBDIR}/greatest")
 set(TSTSRCS "${TSTDIR}/all_tests.c;${TSTDIR}/suite_001.c")
+if (DEFINED ASAN)
+	unset(ASAN)
+	set(ASAN_FLAGS -fsanitize=address,undefined)
+endif()
 
 # Sanity checks
 if (${DEBUG_CMAKE})
@@ -214,7 +218,10 @@ else ()
 	target_compile_options(${TSTTARGET} PRIVATE
 		${COMMON_CFLAGS}
 		${CMSIS_CPPFLAGS}
+		${ASAN_FLAGS}
 	)
+
+	target_link_options(${TSTTARGET} PRIVATE ${ASAN_FLAGS})
 
 	target_include_directories(${TSTTARGET} PRIVATE
 		${TSTDIR}
