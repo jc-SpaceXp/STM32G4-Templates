@@ -19,6 +19,26 @@
 			"name": "asan-host-tests",
 			"binaryDir": "${sourceDir}/build/${presetName}",
 			"cacheVariables": { "ASAN": "ON" }
+		},
+		{
+			"name": "host-tests-clang",
+			"inherits": "host-tests",
+			"cacheVariables": { "CMAKE_C_COMPILER": "clang" }
+		},
+		{
+			"name": "host-tests-gcc",
+			"inherits": "host-tests",
+			"cacheVariables": { "CMAKE_C_COMPILER": "gcc" }
+		},
+		{
+			"name": "asan-host-tests-clang",
+			"inherits": "asan-host-tests",
+			"cacheVariables": { "CMAKE_C_COMPILER": "clang" }
+		},
+		{
+			"name": "asan-host-tests-gcc",
+			"inherits": "asan-host-tests",
+			"cacheVariables": { "CMAKE_C_COMPILER": "gcc" }
 		}
 	],
 	"buildPresets": [
@@ -31,8 +51,24 @@
 			"configurePreset": "host-tests"
 		},
 		{
+			"name": "host-tests-clang",
+			"configurePreset": "host-tests-clang"
+		},
+		{
+			"name": "host-tests-gcc",
+			"configurePreset": "host-tests-gcc"
+		},
+		{
 			"name": "asan-host-tests",
 			"configurePreset": "asan-host-tests"
+		},
+		{
+			"name": "asan-host-tests-clang",
+			"configurePreset": "asan-host-tests-clang"
+		},
+		{
+			"name": "asan-host-tests-gcc",
+			"configurePreset": "asan-host-tests-gcc"
 		}
 	],
 	"testPresets": [
@@ -41,8 +77,24 @@
 			"configurePreset": "host-tests"
 		},
 		{
+			"name": "host-tests-clang",
+			"configurePreset": "host-tests-clang"
+		},
+		{
+			"name": "host-tests-gcc",
+			"configurePreset": "host-tests-gcc"
+		},
+		{
 			"name": "asan-host-tests",
 			"configurePreset": "asan-host-tests"
+		},
+		{
+			"name": "asan-host-tests-clang",
+			"configurePreset": "asan-host-tests-clang"
+		},
+		{
+			"name": "asan-host-tests-gcc",
+			"configurePreset": "asan-host-tests-gcc"
 		}
 	]
 }
