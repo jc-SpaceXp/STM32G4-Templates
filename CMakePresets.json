@@ -14,6 +14,11 @@
 		{
 			"name": "host-tests",
 			"binaryDir": "${sourceDir}/build/${presetName}"
+		},
+		{
+			"name": "asan-host-tests",
+			"binaryDir": "${sourceDir}/build/${presetName}",
+			"cacheVariables": { "ASAN": "ON" }
 		}
 	],
 	"buildPresets": [
@@ -24,12 +29,20 @@
 		{
 			"name": "host-tests",
 			"configurePreset": "host-tests"
+		},
+		{
+			"name": "asan-host-tests",
+			"configurePreset": "asan-host-tests"
 		}
 	],
 	"testPresets": [
 		{
 			"name": "host-tests",
 			"configurePreset": "host-tests"
+		},
+		{
+			"name": "asan-host-tests",
+			"configurePreset": "asan-host-tests"
 		}
 	]
 }
