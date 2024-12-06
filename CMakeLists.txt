@@ -203,6 +203,13 @@ else ()
 		${TESTLIBDIR}
 		${INCDIR}
 	)
+
+	# custom_command() POST-BUILD will delete the executable on failure, custom_target() fixes this issue
+	add_custom_target(runtests ALL
+		DEPENDS ${TSTTARGET}
+		COMMAND ctest --test-dir "${CMAKE_BINARY_DIR}"
+		COMMENT "Executing tests"
+	)
 endif()
 
 unset(CMAKE_TOOLCHAIN_FILE)
