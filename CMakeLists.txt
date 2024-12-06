@@ -229,6 +229,13 @@ else ()
 		${TESTLIBDIR}
 		${INCDIR}
 	)
+
+	# custom_command() POST-BUILD will delete test executable on failure, custom_target doesn't
+	add_custom_target(runtests ALL
+		DEPENDS ${TSTTARGET}
+		COMMAND ctest --test-dir "${CMAKE_BINARY_DIR}"
+		COMMENT "Executing tests"
+	)
 endif()
 
 
